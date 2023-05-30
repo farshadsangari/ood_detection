@@ -1,0 +1,47 @@
+base:
+  model_name: MyResNet18
+  device: cuda
+
+dataloader:
+  batch_size: 128
+  list_custom_classes_training_phase:
+    - airplane
+    - automobile
+    - bird
+    - cat
+    - deer
+    - dog
+    - horse
+    - ship
+    - truck
+
+  list_custom_classes_eval_phase:
+    - frog
+
+  root_path_images: ./data/CIFAR10/
+  to_transform: False
+  imgs_format: .jpg
+
+model:
+  in_channels: 3
+  num_classes: 9
+  pretrained: True
+  embedding_reduction: False
+
+loss:
+  loss_module_name: CrossEntropyLoss
+  loss_fn_args: {}
+
+learning:
+  max_epoch: 5
+#saving_args:
+  report_root: ./reports
+  ckpt_save_root: ./ckpts
+  ckpt_load_path: ~
+  ckpt_save_freq: 10
+#optim_args:
+  learning_rate: 0.0001
+  gamma: 0.995
+
+eval:
+  path_model_eval: 
