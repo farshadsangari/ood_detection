@@ -12,8 +12,7 @@ warnings.filterwarnings("ignore")
 
 def main(configs):
     global model
-    eval_dataloader = get_loaders(configs.dataloader, learning_phase=False)
-    x, y = eval_dataloader
+    eval_dataloader = get_loaders(configs.dataloader, eval_phase=True)
     model = MyResNet18(**configs.model).to(configs.base.device)
 
     model, optimizer = load_model(
@@ -21,7 +20,18 @@ def main(configs):
     )
 
     criterion = get_loss(**OmegaConf.merge(configs.loss))
-
+    loss_terms = {}
+    for i, (key, value) in enumerate(criterion.name_terms_to_return):
+        loss_terms[key] = AverageMeter() if value else 0
+    model.train()
+    loop_train = tqdm(
+        enumerate(train_loader, 1),
+        total=len(train_loader),
+        desc="train",
+        position=0,
+        leave=True,
+    )
+    for batch_idx, (x, y) in loop_train:
     new_loss_terms = criterion(
         model,
         data=x,

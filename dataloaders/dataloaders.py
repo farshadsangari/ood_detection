@@ -2,8 +2,8 @@ from .datasets import MyDataset
 from torch.utils.data import DataLoader
 
 
-def get_loaders(config, learning_phase):
-    if learning_phase:
+def get_loaders(config, eval_phase):
+    if not eval_phase:
         train_dataset = MyDataset(
             subdir="train",
             list_custom_classes_training_phase=config.list_custom_classes_training_phase,
@@ -11,7 +11,7 @@ def get_loaders(config, learning_phase):
             root_path_images=config.root_path_images,
             to_transform=config.to_transform,
             imgs_format=config.imgs_format,
-            training_phase=True,
+            eval_phase=False,
         )
 
         validation_dataset = MyDataset(
@@ -21,7 +21,7 @@ def get_loaders(config, learning_phase):
             root_path_images=config.root_path_images,
             to_transform=config.to_transform,
             imgs_format=config.imgs_format,
-            training_phase=True,
+            eval_phase=False,
         )
 
         train_loader = DataLoader(
@@ -45,7 +45,7 @@ def get_loaders(config, learning_phase):
             root_path_images=config.root_path_images,
             to_transform=config.to_transform,
             imgs_format=config.imgs_format,
-            training_phase=False,
+            eval_phase=True,
         )
         eval_loader = DataLoader(
             dataset=eval_dataset,

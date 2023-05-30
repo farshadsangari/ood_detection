@@ -27,27 +27,29 @@ class MyDataset(Dataset):
         root_path_images,
         to_transform,
         imgs_format,
-        training_phase,
+        eval_phase,
     ):
         super(MyDataset, self).__init__()
         self.root_path_images = root_path_images
         self.subdir = subdir
         self.to_transform = to_transform
         self.imgs_format = imgs_format
-        if training_phase:
-            self.path_images = self.get_custom_classes_path(
-                list_custom_classes_training_phase
-            )
-        else:
-            self.path_images = self.get_custom_classes_path(
-                list_custom_classes_eval_phase
-            )
-
         self.class_to_int = {
             list_custom_classes_training_phase[i]: i
             for i in range(len(list_custom_classes_training_phase))
         }
-        self.all_classes_to_int = self.class_to_int
+
+        if eval_phase:
+            self.path_images = self.get_custom_classes_path(
+                custom_classes=list_custom_classes_eval_phase
+            )
+            for class_ in list_custom_classes_eval_phase:
+                if class_ not in self.class_to_int.keys():
+                    self.class_to_int[class_] = max(self.class_to_int.values()) + 1
+        else:
+            self.path_images = self.get_custom_classes_path(
+                custom_classes=list_custom_classes_training_phase
+            )
 
     def transformations(self, to_tensor, last_idx_before_tensor=0):
         list_image_transforms = [
@@ -113,20 +115,20 @@ class MyDataset(Dataset):
         images_batch = torch.stack(imgs_list, dim=0)
         return images_batch, labels_lst
 
-    # def get_custom_classes_data(self, custom_classes):
-    #     for class_ in custom_classes:
-    #         if class_ not in self.all_classes_to_int.keys():
-    #             self.all_classes_to_int[class_] = max(self.class_to_int.values()) + 1
-    #     img_paths = self.get_custom_classes_path(custom_classes=custom_classes)
-    #     imgs_list, labels_lst = [], []
-    #     for path in img_paths:
-    #         image = Image.open(path)
-    #         image, image_tensor = self.transformation_handler(image)
-    #         label = path.split("/")[-2]
-    #         label = self.class_to_int[label]
-    #         imgs_list.append(image_tensor)
-    #         labels_lst.append(label)
-    #     imgs_batchwise_form = torch.stack(imgs_list, dim=0)
-    #     labels_tensor = torch.tensor(labels_lst)
+    def get_custom_classes_data(self, custom_classes):
+        for class_ in custom_classes:
+            if class_ not in self.all_classes_to_int.keys():
+                self.all_classes_to_int[class_] = max(self.class_to_int.values()) + 1
+        img_paths = self.get_custom_classes_path(custom_classes=custom_classes)
+        imgs_list, labels_lst = [], []
+        for path in img_paths:
+            image = Image.open(path)
+            image, image_tensor = self.transformation_handler(image)
+            label = path.split("/")[-2]
+            label = self.class_to_int[label]
+            imgs_list.append(image_tensor)
+            labels_lst.append(label)
+        imgs_batchwise_form = torch.stack(imgs_list, dim=0)
+        labels_tensor = torch.tensor(labels_lst)
 
-    #     return imgs_batchwise_form, labels_tensor
+        return imgs_batchwise_form, labels_tensor
