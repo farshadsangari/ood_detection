@@ -2,19 +2,9 @@ import os
 import numpy as np
 import glob
 from torch.utils.data import Dataset
-from tqdm import tqdm
-from PIL import Image
-from torchvision.transforms import transforms
-
-
-import os
-import numpy as np
-import glob
-from torch.utils.data import Dataset
 from torchvision.transforms import transforms
 import random
 from PIL import Image
-from tqdm import tqdm
 import torch
 
 
@@ -51,11 +41,19 @@ class MyDataset(Dataset):
                 custom_classes=list_custom_classes_training_phase
             )
 
-    def transformations(self, to_tensor, last_idx_before_tensor=0):
+    def transformations(self, to_tensor, last_idx_before_tensor=3):
         list_image_transforms = [
-            transforms.CenterCrop((256, 256)),
+            transforms.RandomCrop(size=32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(degrees=15),
+            transforms.ColorJitter(brightness=0.1, contrast=0.1),
             transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.49139968, 0.48215827, 0.44653124],
+                std=[0.24703233, 0.24348505, 0.26158768],
+            ),
         ]
+
         if to_tensor:
             return transforms.Compose(list_image_transforms)
 

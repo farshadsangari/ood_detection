@@ -15,11 +15,8 @@ dataloader:
     - ship
     - truck
 
-  list_custom_classes_eval_phase:
-    - frog
-
   root_path_images: ./data/CIFAR10/
-  to_transform: False
+  to_transform: True
   imgs_format: .jpg
 
 model:
@@ -33,15 +30,23 @@ loss:
   loss_fn_args: {}
 
 learning:
-  max_epoch: 5
-#saving_args:
+  max_epoch: 20
+  #saving_args:
   report_root: ./reports
   ckpt_save_root: ./ckpts
   ckpt_load_path: ~
   ckpt_save_freq: 10
-#optim_args:
+  #optim_args:
   learning_rate: 0.0001
   gamma: 0.995
 
 eval:
-  path_model_eval: 
+  list_custom_classes_eval_phase:
+    - frog
+  path_model_eval: ./ckpts/ckpt_MyResNet18_epoch_20.pt
+  threshold: 0.95
+  is_ood: True
+  batch_size: 128
+  root_path_images: ./data/CIFAR10/
+  to_transform: True
+  imgs_format: .jpg

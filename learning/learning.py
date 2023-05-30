@@ -45,13 +45,13 @@ def Training(
             leave=True,
         )
         for batch_idx, (x, y) in loop_train:
-            new_loss_terms = criterion(
+            new_loss_terms = criterion.in_distribution_performance(
                 model,
                 data=x,
                 labels=y,
                 optimizer=optimizer,
                 device=config.device,
-                is_training=True,
+                is_learning=True,
             )
             # Update losses
             for i, (key, value) in enumerate(criterion.name_terms_to_return):
@@ -100,13 +100,13 @@ def Training(
                 )
 
                 for batch_idx, (x, y) in loop_val:
-                    new_loss_terms = criterion(
+                    new_loss_terms = criterion.in_distribution_performance(
                         model,
                         data=x,
                         labels=y,
                         optimizer=optimizer,
                         device=config.device,
-                        is_training=False,
+                        is_learning=False,
                     )
                     # Update losses
                     for i, (key, value) in enumerate(criterion.name_terms_to_return):

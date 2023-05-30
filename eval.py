@@ -4,30 +4,30 @@ from dataloaders import get_loaders
 from learning import Training
 from omegaconf import OmegaConf
 from models import MyResNet18
+from utils import load_model
+from evaluation import Evaluation
 
 warnings.filterwarnings("ignore")
 
 
 def main(configs):
     global model
-    train_dataset, validation_dataset, train_loader, validation_loader = get_loaders(
-        configs, eval_phase=False
-    )
+    eval_loader = get_loaders(configs, eval_phase=True)
     model = MyResNet18(**configs.model).to(configs.base.device)
+
+    model, optimizer = load_model(
+        ckpt_path=configs.eval.path_model_eval, model=model, optimizer=None
+    )
+
     criterion = get_loss(
         loss_module_name=configs.loss.loss_module_name,
-        is_ood=False,
+        is_ood=configs.eval.is_ood,
         kwargs=configs.loss.loss_fn_args,
     )
 
-    model, optimizer, report = Training(
-        model=model,
-        criterion=criterion,
-        train_loader=train_loader,
-        val_loader=validation_loader,
-        config=OmegaConf.merge(configs.model, configs.learning, configs.base),
+    Evaluation(
+        model=model, criterion=criterion, eval_loader=eval_loader, configs=configs
     )
-    return model, optimizer, report
 
 
 if __name__ == "__main__":
