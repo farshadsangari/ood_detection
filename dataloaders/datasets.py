@@ -41,12 +41,11 @@ class MyDataset(Dataset):
                 custom_classes=list_custom_classes_training_phase
             )
 
-    def transformations(self, to_tensor, last_idx_before_tensor=3):
+    def transformations(self, to_tensor, last_idx_before_tensor=2):
         list_image_transforms = [
             transforms.RandomCrop(size=32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(degrees=15),
-            transforms.ColorJitter(brightness=0.1, contrast=0.1),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.49139968, 0.48215827, 0.44653124],
