@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import numpy as np
 
 
 def get_loss(loss_module_name, is_ood, kwargs):
@@ -65,3 +66,29 @@ class CrossEntropyLoss:
         outlier_detection_performance = 1 - num_outliers / data.shape[0]
 
         return (outlier_detection_performance,)
+
+    def ood_performance(self, model, data, labels, device):
+        """This function returns number of data that are detected as an outlier.
+        ALL the data taht are given in this function are outlier(out of distribution data)
+        """
+
+        data = data.to(device)
+        labels = labels.to(device)
+        logits = model(data)
+        accuracy = accuracy_fn(output=logits, target=labels)
+        probs = self.softmax(logits).cpu()
+        preds = np.argmax(probs.detach().numpy(), axis=1)
+        logits = logits.cpu().detach().numpy()
+
+        # num_outliers = sum(probs.max(dim=1).values > threshold).item()
+        # outlier_detection_performance = 1 - num_outliers / data.shape[0]
+
+        return (logits, probs, preds)
+
+    def find_thresh(self, model, data, labels, threshold, device):
+        data = data.to(device)
+        labels = labels.to(device)
+        logits = model(data)
+        probs = self.softmax(logits).cpu()
+        num_inlier = sum(probs.max(dim=1).values > threshold).item()
+        return num_inlier / data.shape[0]

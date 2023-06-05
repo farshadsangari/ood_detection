@@ -5,14 +5,30 @@ from learning import Training
 from omegaconf import OmegaConf
 from models import MyResNet18
 from utils import load_model
-from evaluation import Evaluation
+from evaluation import Evaluation, find_threshold
 
 warnings.filterwarnings("ignore")
 
 
 def main(configs):
     global model
-    eval_loader = get_loaders(configs, eval_phase=True)
+    list_of_inlier_classes = [
+        "airplane",
+        "automobile",
+        "bird",
+        "cat",
+        "deer",
+        "dog",
+        "horse",
+        "ship",
+        "truck",
+    ]
+    configs.eval.list_custom_classes_eval_phase = list_of_inlier_classes
+    inlier_loader = get_loaders(configs, eval_phase=True)
+    list_of_outlier_classes = ["frog"]
+    configs.eval.list_custom_classes_eval_phase = list_of_outlier_classes
+    outlier_loader = get_loaders(configs, eval_phase=True)
+
     model = MyResNet18(**configs.model).to(configs.base.device)
 
     model, optimizer = load_model(
@@ -24,7 +40,13 @@ def main(configs):
         is_ood=configs.eval.is_ood,
         kwargs=configs.loss.loss_fn_args,
     )
-
+    # Find threshold
+    # find_threshold(
+    #     model=model, criterion=criterion, eval_loader=inlier_loader, configs=configs
+    # )
+    find_threshold(
+        model=model, criterion=criterion, eval_loader=outlier_loader, configs=configs
+    )
     Evaluation(
         model=model, criterion=criterion, eval_loader=eval_loader, configs=configs
     )

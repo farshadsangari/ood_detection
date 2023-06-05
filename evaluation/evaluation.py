@@ -2,6 +2,7 @@ import torch
 from utils import AverageMeter
 from tqdm import tqdm
 from collections import OrderedDict
+import numpy as np
 
 
 def Evaluation(
@@ -61,3 +62,38 @@ def Evaluation(
                 ordered_dict=avg_loss_terms,
                 refresh=True,
             )
+
+
+def find_threshold(
+    model,
+    criterion,
+    eval_loader,
+    configs,
+):
+    model.eval()
+    with torch.no_grad():
+        thresholds = np.arange(0.6, 1, 0.01)
+        for thresh in thresholds:
+            loop_val = tqdm(
+                enumerate(eval_loader, 1),
+                total=len(eval_loader),
+                desc="eval",
+                position=0,
+                leave=True,
+            )
+            avg_prob = AverageMeter()
+            for _, (x, y) in loop_val:
+                batch_prob = criterion.find_thresh(
+                    model=model,
+                    data=x,
+                    labels=y,
+                    threshold=thresh,
+                    device=configs.base.device,
+                )
+                avg_prob.update(batch_prob)
+
+                loop_val.set_description(f"Evaluation: ")
+                loop_val.set_postfix(
+                    ordered_dict={"Threshold": thresh, "Average prob": avg_prob.avg},
+                    refresh=True,
+                )
