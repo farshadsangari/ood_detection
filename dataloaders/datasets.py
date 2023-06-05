@@ -28,6 +28,12 @@ class MyDataset(Dataset):
             list_custom_classes_training_phase[i]: i
             for i in range(len(list_custom_classes_training_phase))
         }
+        if subdir == "train":
+            self.transformations = self.transformations_train
+        elif subdir == "test":
+            self.transformations = self.transformations_test
+        else:
+            raise Exception("Unknown subdir")
 
         if eval_phase:
             self.path_images = self.get_custom_classes_path(
@@ -41,11 +47,29 @@ class MyDataset(Dataset):
                 custom_classes=list_custom_classes_training_phase
             )
 
-    def transformations(self, to_tensor, last_idx_before_tensor=2):
+    def transformations_train(self, to_tensor, last_idx_before_tensor=1):
         list_image_transforms = [
-            transforms.RandomCrop(size=32, padding=4),
+            transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(degrees=15),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.49139968, 0.48215827, 0.44653124],
+                std=[0.24703233, 0.24348505, 0.26158768],
+            ),
+        ]
+
+        if to_tensor:
+            return transforms.Compose(list_image_transforms)
+
+        else:
+            return transforms.Compose(
+                list_image_transforms[: last_idx_before_tensor + 1]
+            )
+
+    def transformations_test(self, to_tensor, last_idx_before_tensor=-1):
+        list_image_transforms = [
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.49139968, 0.48215827, 0.44653124],
