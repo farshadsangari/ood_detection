@@ -5,6 +5,7 @@ import pandas as pd
 from utils import AverageMeter
 from tqdm import tqdm
 from collections import OrderedDict
+from torch.optim.lr_scheduler import ExponentialLR
 
 
 def Training(
@@ -16,6 +17,7 @@ def Training(
 ):
     global report
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+    lr_scheduler = ExponentialLR(optimizer, gamma=config.gamma)
     if config.ckpt_load_path:
         model, optimizer = load_model(
             ckpt_path=config.ckpt_load_path, model=model, optimizer=optimizer
@@ -161,5 +163,6 @@ def Training(
         model=model,
         optimizer=optimizer,
     )
+    lr_scheduler.step()
     report.to_csv(f"{config.report_root}/report_{config.model_name}_epoch_{epoch}.csv")
     return model, optimizer, report
