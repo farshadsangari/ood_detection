@@ -30,10 +30,8 @@ class MyDataset(Dataset):
         }
         if subdir == "train":
             self.transformations = self.transformations_train
-        elif subdir == "test":
+        if subdir == "test":
             self.transformations = self.transformations_test
-        else:
-            raise Exception("Unknown subdir")
 
         if eval_phase:
             self.path_images = self.get_custom_classes_path(
@@ -68,8 +66,6 @@ class MyDataset(Dataset):
 
     def transformations_test(self, to_tensor, last_idx_before_tensor=-1):
         list_image_transforms = [
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.49139968, 0.48215827, 0.44653124],
