@@ -34,7 +34,7 @@ class CrossEntropyLoss:
         self.criterion = nn.CrossEntropyLoss()
         self.softmax = nn.Softmax()
         if is_ood:
-            self.name_terms_to_return = [("outlier detection performance", True)]
+            self.name_terms_to_return = [("outlier detection Error", True)]
         else:
             self.name_terms_to_return = [("CrossEntropyLoss", True), ("Accuracy", True)]
 
@@ -62,28 +62,28 @@ class CrossEntropyLoss:
         labels = labels.to(device)
         labels_pred = model(data)
         probs = self.softmax(labels_pred)
-        num_outliers = sum(probs.max(dim=1).values > threshold).item()
-        outlier_detection_performance = 1 - num_outliers / data.shape[0]
+        num_outliers = sum(probs.max(dim=1).values < threshold).item()
+        outlier_detection_performance = num_outliers / data.shape[0]
+        outlier_detection_error = 1 - outlier_detection_performance
+        return (outlier_detection_error,)
 
-        return (outlier_detection_performance,)
+    # def ood_performance(self, model, data, labels, device):
+    #     """This function returns number of data that are detected as an outlier.
+    #     ALL the data taht are given in this function are outlier(out of distribution data)
+    #     """
 
-    def ood_performance(self, model, data, labels, device):
-        """This function returns number of data that are detected as an outlier.
-        ALL the data taht are given in this function are outlier(out of distribution data)
-        """
+    #     data = data.to(device)
+    #     labels = labels.to(device)
+    #     logits = model(data)
+    #     accuracy = accuracy_fn(output=logits, target=labels)
+    #     probs = self.softmax(logits).cpu()
+    #     preds = np.argmax(probs.detach().numpy(), axis=1)
+    #     logits = logits.cpu().detach().numpy()
 
-        data = data.to(device)
-        labels = labels.to(device)
-        logits = model(data)
-        accuracy = accuracy_fn(output=logits, target=labels)
-        probs = self.softmax(logits).cpu()
-        preds = np.argmax(probs.detach().numpy(), axis=1)
-        logits = logits.cpu().detach().numpy()
+    #     # num_outliers = sum(probs.max(dim=1).values > threshold).item()
+    #     # outlier_detection_performance = 1 - num_outliers / data.shape[0]
 
-        # num_outliers = sum(probs.max(dim=1).values > threshold).item()
-        # outlier_detection_performance = 1 - num_outliers / data.shape[0]
-
-        return (logits, probs, preds)
+    #     return (logits, probs, preds)
 
     def find_thresh(self, model, data, labels, threshold, device):
         data = data.to(device)
