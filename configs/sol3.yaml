@@ -1,5 +1,5 @@
 base:
-  model_name: MyResNet18_frog
+  model_name: MyResNet18_cat
   device: cuda
 
 dataloader:
@@ -8,7 +8,7 @@ dataloader:
     - airplane
     - automobile
     - bird
-    - cat
+    - frog
     - deer
     - dog
     - horse
@@ -37,8 +37,8 @@ learning:
   ckpt_load_path: ~
   ckpt_save_freq: 5
   #optim_args:
-  learning_rate: 0.0001
-  gamma: 0.998
+  learning_rate: 0.000015
+  gamma: 0.999
 
 eval:
   list_custom_classes_eval_phase:
