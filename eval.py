@@ -23,9 +23,10 @@ def main(configs):
         "ship",
         "truck",
     ]
+    list_of_outlier_classes = ["frog"]
+    configs.eval.path_model_eval = "./ckpts/ckpt_MyResNet18_frog_epoch_200.pt"
     configs.eval.list_custom_classes_eval_phase = list_of_inlier_classes
     inlier_loader = get_loaders(configs, eval_phase=True)
-    list_of_outlier_classes = ["frog"]
     configs.eval.list_custom_classes_eval_phase = list_of_outlier_classes
     outlier_loader = get_loaders(configs, eval_phase=True)
 
@@ -44,11 +45,11 @@ def main(configs):
     # find_threshold(
     #     model=model, criterion=criterion, eval_loader=inlier_loader, configs=configs
     # )
-    find_threshold(
-        model=model, criterion=criterion, eval_loader=outlier_loader, configs=configs
-    )
+
+    configs.eval.threshold = 0.54
+    configs.eval.is_ood = True
     Evaluation(
-        model=model, criterion=criterion, eval_loader=eval_loader, configs=configs
+        model=model, criterion=criterion, eval_loader=outlier_loader, configs=configs
     )
 
 

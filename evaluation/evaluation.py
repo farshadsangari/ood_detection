@@ -72,7 +72,7 @@ def find_threshold(
 ):
     model.eval()
     with torch.no_grad():
-        thresholds = np.arange(0.6, 1, 0.01)
+        thresholds = np.arange(0.5, 1, 0.01)
         for thresh in thresholds:
             loop_val = tqdm(
                 enumerate(eval_loader, 1),
