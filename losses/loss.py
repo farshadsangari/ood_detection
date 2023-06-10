@@ -34,7 +34,7 @@ class CrossEntropyLoss:
         self.criterion = nn.CrossEntropyLoss()
         self.softmax = nn.Softmax()
         if is_ood:
-            self.name_terms_to_return = [("outlier detection Error", True)]
+            self.name_terms_to_return = [("outlier detection performance", True)]
         else:
             self.name_terms_to_return = [("CrossEntropyLoss", True), ("Accuracy", True)]
 
@@ -65,7 +65,7 @@ class CrossEntropyLoss:
         num_outliers = sum(probs.max(dim=1).values < threshold).item()
         outlier_detection_performance = num_outliers / data.shape[0]
         outlier_detection_error = 1 - outlier_detection_performance
-        return (outlier_detection_error,)
+        return (outlier_detection_performance,)
 
     # def ood_performance(self, model, data, labels, device):
     #     """This function returns number of data that are detected as an outlier.
